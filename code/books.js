@@ -6,6 +6,14 @@ const uuid = require('uuid');
 const dynamo = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.DYNAMODB_TABLE;
 
+/*
+{
+"name": "noick2",
+"authorName": "nicky2",
+"releaseDate": 2
+}
+*/
+
 // create a book
 exports.upsert = (evt, ctx, cb) => {
 
@@ -18,12 +26,12 @@ exports.upsert = (evt, ctx, cb) => {
     return
   }
 
-  const uuid = data.uuid ? data.uuid : uuid.v1();
+  const bookUuid = data.uuid ? data.uuid : uuid.v1();
 
   const params = {
     TableName: tableName,
     Item: {
-      uuid: uuid.v1(),
+      uuid: bookUuid,
       name: data.name,
       authorName: data.authorName,
       releaseDate: data.releaseDate
@@ -36,7 +44,7 @@ exports.upsert = (evt, ctx, cb) => {
       cb(err)
     } else {
       cb(null, {
-        statusCode: 201,
+        statusCode: data.uuid ? 200 : 201,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
@@ -47,15 +55,14 @@ exports.upsert = (evt, ctx, cb) => {
   })
 };
 
-// get a book
+// delete and get a book
 exports.delete = (evt, ctx, cb) => {
 
-  console.log( `delete ${evt.pathParameters}` );
+  console.log( evt.pathParameters );
 
   dynamo.delete({
     Key: {
-      uuid: evt.pathParameters.id,
-      NumberRangeKey: 1
+      uuid: evt.pathParameters.id
     },
     TableName: tableName
   }, (err, data) => {

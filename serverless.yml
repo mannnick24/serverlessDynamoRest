@@ -46,7 +46,7 @@ functions:
     events:
       - http:
           path: /books/{id}
-          method: get
+          method: delete
           cors: true
 resources:
   Resources:
